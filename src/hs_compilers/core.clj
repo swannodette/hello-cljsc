@@ -1,7 +1,6 @@
 (ns hs-compilers.core
   (:require
     [clojure.pprint :as pp]
-    [clojure.java.io :as io]
     [clojure.tools.reader :as reader]
     [clojure.tools.reader.reader-types :as readers]
     [cljs.analyzer :as ana]
