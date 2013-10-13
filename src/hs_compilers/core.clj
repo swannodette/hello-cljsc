@@ -32,9 +32,18 @@
 
   (meta (first (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
 
-  (meta (second (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))))
+  (-> (string-reader "(fn [x y]\n(+ x y))")
+    forms-seq
+    first
+    second
+    meta)
 
-  (meta (first (rest (rest (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))))))
+  (-> (forms-seq (string-reader "(fn [x y]\n(+ x y))"))
+    first
+    rest
+    rest
+    first
+    meta)
   )
 
 ;; =============================================================================
