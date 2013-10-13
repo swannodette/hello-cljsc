@@ -29,6 +29,8 @@
 
   (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))
 
+  (type (first (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
+
   (meta (first (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
 
   (-> (string-reader "(fn [x y]\n(+ x y))")
@@ -56,7 +58,12 @@
 (comment
   (read1 "[1 2 3]")
 
+  (type (read1 "[1 2 3]"))
+
   (let [form (read1 "[1 2 3]")]
+    (pp/pprint (ana/analyze user-env form)))
+
+  (let [form (read1 "(foo 1)")]
     (pp/pprint (ana/analyze user-env form)))
 
   (read1 "(if x true false)")
