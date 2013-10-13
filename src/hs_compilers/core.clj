@@ -24,6 +24,8 @@
     (forms-seq*)))
 
 (comment
+  (forms-seq (string-reader "(+ 1 2)"))
+  
   (first (forms-seq (string-reader "(+ 1 2)")))
 
   (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))
