@@ -46,10 +46,35 @@
   (first (forms-seq (string-reader str))))
 
 (comment
+  (read1 "[1 2 3]")
+
+  (let [form (read1 "[1 2 3]")]
+    (pp/pprint (ana/analyze user-env form)))
+
   (read1 "(if x true false)")
 
   (first (read1 "(if x true false)"))
 
+  (let [form (read1 "(if x true false)")]
+    (ana/parse (first form) user-env form nil))
+
+  ;; copy and pasted from compiler.clj
+  (defmethod parse 'if
+    [op env [_ test then else :as form] name]
+    (when (< (count form) 3)
+      (throw (error env "Too few arguments to if")))
+    (let [test-expr (disallowing-recur (analyze (assoc env :context :expr) test))
+          then-expr (analyze env then)
+          else-expr (analyze env else)]
+      {:env env
+       :op :if
+       :form form
+       :test test-expr
+       :then then-expr
+       :else else-expr
+       :unchecked @*unchecked-if*
+       :children [test-expr then-expr else-expr]}))
+  
   (let [form (read1 "(if x true false)")]
     (pp/pprint (ana/analyze user-env form)))
   )
