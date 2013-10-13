@@ -91,14 +91,6 @@
   )
 
 ;; =============================================================================
-;; Expressions
-
-(comment
-  (let [form (read1 "(if (let [x true] x) true false)")]
-    (c/emit (ana/analyze user-env form)))
-  )
-
-;; =============================================================================
 ;; Macros
 
 (comment
@@ -115,6 +107,9 @@
 
   (let [form (read1 "(+ 1 (bit-shift-left 16 1))")]
     (c/emit (ana/analyze user-env form)))
+
+  (let [form (read1 "(let [arr (array)] (aset arr 0 100))")]
+    (c/emit (ana/analyze user-env form)))
   )
 
 ;; =============================================================================
@@ -124,7 +119,7 @@
   (let [form (read1 "(let [x true] true)")]
     (c/infer-tag (ana/analyze user-env form)))
 
-  ;; a bug!
+  ;; a bug! anyone want to help fix it?
   (let [form (read1 "(and true false)")]
     (c/infer-tag (ana/analyze user-env form)))
   )
