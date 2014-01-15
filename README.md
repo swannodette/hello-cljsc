@@ -8,6 +8,8 @@ understanding of how it all works.
 
 ## Usage
 
+Install [Leiningen](http://leiningen.org).
+
 Clone the repository. Open `src/hello-cljsc/core.clj` in
 [Light Table](http://www.lighttable.com) and enjoy.
 
