@@ -134,7 +134,7 @@
 ;; (first '(1 2 3)).
 
 ;; Special forms are actually handled by the compiler. Macros allows users
-;; to extend the language without needing to be a Lisp compiler hackers.
+;; to extend the language without needing to be a Lisp compiler hacker.
 ;; Macros will desugar into special forms.
 
 ;; The ClojureScript compiler when it encounters an s-expression that
@@ -243,7 +243,7 @@
 ;; there's as much code in the macro file as there is in the analyzer file or
 ;; the compiler file!
 
-;; Every after this point is just icing!
+;; Everything after this point is just icing!
 
 ;; =============================================================================
 ;; Macros
