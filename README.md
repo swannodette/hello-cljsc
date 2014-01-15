@@ -8,7 +8,7 @@ understanding of how it all works.
 
 ## Usage
 
-Clone the repository. Open `src/hello-cljsc.clj` in
+Clone the repository. Open `src/hello-cljsc/core.clj` in
 [Light Table](http://www.lighttable.com) and enjoy.
 
 Pull requests very welcome.
