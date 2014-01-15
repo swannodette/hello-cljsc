@@ -1,7 +1,7 @@
 ;; The ClojureScript analyzer and compiler can be easily explored from Clojure.
 ;; This tutorial was designed with Light Table in mind. Evaluate the forms in
 ;; this file one by one by placing your cursor after each expression and pressing
-;; Command-ENTER.
+;; Command-ENTER. Start with evaluating this namespace expression.
 
 (ns hello-cljsc.core
   (:require
@@ -110,7 +110,8 @@
 ;; simple maps. For the following part open the console in a tab so it's easier
 ;; to view the pretty printed output.
 
-;; This will pretty print a :vector AST node.
+;; This will pretty print a :vector AST node. Click the highlighted number in
+;; the lower right corner to bring up the console to see the output.
 (let [form (read1 "[1 2 3]")]
   (pp/pprint (ana/analyze user-env form)))
 
@@ -170,7 +171,7 @@
 ;; Once we have an AST node, compilation is relatively straightforward.
 
 ;; To compile an AST node to JavaScript we just call cljs.compiler/emit
-;; with an AST node as the argument.
+;; with an AST node as the argument. Click on the output box to expand it.
 (let [form (read1 "(if x true false)")]
   (with-out-str (c/emit (ana/analyze user-env form))))
 
@@ -218,7 +219,7 @@
 ;; First it invokes cljs.user/foo through JavaScript's Function call method which
 ;; will be slower on most engines. Also by going through call we will need to
 ;; examine the arguments objects to determine which arity to invoke, another
-;; performance hit. This eems a bit silly given that we saw above that the analyzer
+;; performance hit. This seems a bit silly given that we saw above that the analyzer
 ;; records enough information to optimize this case.
 (let [form (read1 "(defn bar [] (foo 1))")]
   (emit-str
