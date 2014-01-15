@@ -55,7 +55,7 @@
 ;; form-seq will return a seq containing two forms.
 (forms-seq (string-reader "(+ 1 2) (+ 3 4)"))
 
-;; The first first form is (+ 1 2)
+;; The first form is (+ 1 2)
 (first (forms-seq (string-reader "(+ 1 2) (+ 3 4 )")))
 
 ;; The first form is a list.
