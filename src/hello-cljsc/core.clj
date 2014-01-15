@@ -10,6 +10,7 @@
     [clojure.tools.reader.reader-types :as readers]
     [cljs.analyzer :as ana]
     [cljs.compiler :as c]
+    [cljs.closure :as cc]
     [cljs.env :as env])
   (:import [java.io StringReader]))
 
@@ -117,8 +118,8 @@
 (let [form (read1 "(foo 1)")]
   (pp/pprint (ana/analyze user-env form)))
 
-;; Before moving any further let's the steps to go from a string to a ClojureScript
-;; AST node.
+;; Before moving any further let's the steps to go from a string to a
+;; ClojureScript AST node.
 
 ;; First we read a string converting text into forms.
 (read1 "(if x true false)")
@@ -126,17 +127,18 @@
 ;; The very first element in the form (if x true false) is a symbol
 (first (read1 "(if x true false)"))
 
-;; In Lisp source code, the first element of an s-expression (form) like (foo 1 2)
-;; is extremely important. The first element determines where it is a special form
-;; as in the case of (if x true false), a macro as in the case of (and true false),
-;; or a function call as in the case of (first '(1 2 3)).
+;; In Lisp source code, the first element of an s-expression (form) like
+;; (foo 1 2) is extremely important. The first element determines where it
+;; is a special form as in the case of (if x true false), a macro as in the
+;; case of (and true false), or a function call as in the case of
+;; (first '(1 2 3)).
 
-;; Special forms are actually handled by the compiler. Macros allows users to extend
-;; the language without needing to be a Lisp compiler hacros. Macros will desugar into
-;; special forms.
+;; Special forms are actually handled by the compiler. Macros allows users
+;; to extend the language without needing to be a Lisp compiler hacros.
+;; Macros will desugar into special forms.
 
-;; If the ClojureScript compiler when it encounters and s-expression with a special
-;; form call the cljs.analyer/parse multimethod
+;; If the ClojureScript compiler when it encounters and s-expression with
+;; a special form call the cljs.analyer/parse multimethod
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/parse (first form) user-env form nil)))
 
@@ -244,6 +246,9 @@
 ;; =============================================================================
 ;; Macros
 
+;; Macros allow us to eliminate a considerable amount of complexity from the
+;; ClojureScript analyzer and compiler.
+
 (read1 "(and true (diverge))")
 
 (let [form (read1 "(and true (diverge))")]
@@ -286,4 +291,14 @@
 ;; =============================================================================
 ;; Google Closure
 
-;; Google Closure includes optimization facilities
+;; Google Closure applies many more optimizations beyond what the ClojureScript
+;; compiler applies. Google Closure will remove superfluous functions, inline
+;; functions, fold constants, remove dead code, and minify the final source.
+;; Evaluate the following.
+(let [form (read1 "(let [x (cond true (+ 1 2) :else (+ 3 4))] x)")]
+  (emit-str (ana/analyze user-env form)))
+
+;; The same expression with simple optimizations is surprisingly terse.
+(let [form (read1 "(let [x (cond true (+ 1 2) :else (+ 3 4))] x)")]
+  (cc/optimize {:optimizations :simple}
+    (emit-str (ana/analyze user-env form))))
