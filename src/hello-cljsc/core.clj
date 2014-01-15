@@ -218,7 +218,7 @@
 ;; First it invokes cljs.user/foo through JavaScript's Function call method which
 ;; will be slower on most engines. Also by going through call we will need to
 ;; examine the arguments objects to determine which arity to invoke, another
-;; performance hit. This eems a bit silly given that we saw above that the analyzer
+;; performance hit. This seems a bit silly given that we saw above that the analyzer
 ;; records enough information to optimize this case.
 (let [form (read1 "(defn bar [] (foo 1))")]
   (emit-str
