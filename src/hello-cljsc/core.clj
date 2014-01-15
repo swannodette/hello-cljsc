@@ -20,7 +20,7 @@
 ;; First we define a series of utility helper functions which will simplify
 ;; our interactions with the ClojureScript analyzer and compiler.
 
-;; A simple helper to emit emit ClojureScript compiled to JavaScript
+;; A simple helper to emit ClojureScript compiled to JavaScript
 ;; as a string.
 (defn emit-str [ast]
   (with-out-str (c/emit ast)))
