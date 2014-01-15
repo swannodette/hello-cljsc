@@ -165,50 +165,16 @@
 ;; =============================================================================
 ;; Compiling
 
-;; to compile an AST node to JavaScript we just call cljs.compiler/emit
-;; with an AST node as the argument
+;; Once we have an AST, compilation is relatively straightforward.
+
+;; To compile an AST node to JavaScript we just call cljs.compiler/emit
+;; with an AST node as the argument.
 (let [form (read1 "(if x true false)")]
   (with-out-str (c/emit (ana/analyze user-env form))))
 
-;; pretty simple! try different things!
+;; Pretty simple! try different things!
 (let [form (read1 "(fn [a b] (+ a b))")]
   (with-out-str (c/emit (ana/analyze user-env form))))
-
-;; =============================================================================
-;; Macros
-
-(read1 "(and true (diverge))")
-
-(let [form (read1 "(and true (diverge))")]
-  (pp/pprint (ana/macroexpand-1 user-env form)))
-
-(let [form (read1 "(+ 1 2 3 4 5 6)")]
-  (c/emit (ana/analyze user-env form)))
-
-(let [form (read1 "(apply + [1 2 3 4 5 6])")]
-  (c/emit (ana/analyze user-env form)))
-
-(let [form (read1 "(+ 1 (bit-shift-left 16 1))")]
-  (c/emit (ana/analyze user-env form)))
-
-(let [form (read1 "(let [arr (array)] (aset arr 0 100))")]
-  (c/emit (ana/analyze user-env form)))
-
-;; =============================================================================
-;; Type Inference
-
-;; The ClojureScript compiler has some simple type inference to aid with both
-;; performance and some rudimentary type checking.
-
-(let [form (read1 "(let [x true] true)")]
-  (c/infer-tag (ana/analyze user-env form)))
-
-;; a bug! anyone want to help fix it?
-(let [form (read1 "(and true false)")]
-  (c/infer-tag (ana/analyze user-env form)))
-
-(let [form (read1 "(if ^boolean (and true false) true false)")]
-  (c/emit (ana/analyze user-env form)))
 
 ;; =============================================================================
 ;; Using analysis
@@ -246,9 +212,6 @@
   (env/with-compiler-env cenv
     (c/emit (ana/analyze user-env form))))
 
-;; =============================================================================
-;; Using analysis
-
 ;; When you evalute this notice that the generated JavaScript is suboptimal.
 ;; First it invokes cljs.user/foo through JavaScript's call which will be slower
 ;; on engines. Also by going through call we will need to examine the arguments
@@ -268,3 +231,59 @@
     (emit-str
       (env/with-compiler-env cenv
         (ana/analyze user-env form)))))
+
+;; =============================================================================
+;; That's it!
+
+;; You now have a basic understanding of the role of the ClojureScript analyzer
+;; and the compiler. Most of language "features" you find in ClojureScript are
+;; actually provided via macros. In fact if you look at cljs/core.clj you'll see
+;; there's as much code in the macro file as there is in the analyzer file or
+;; the compiler file!
+
+;; =============================================================================
+;; Macros
+
+(read1 "(and true (diverge))")
+
+(let [form (read1 "(and true (diverge))")]
+  (pp/pprint (ana/macroexpand-1 user-env form)))
+
+(let [form (read1 "(+ 1 2 3 4 5 6)")]
+  (c/emit (ana/analyze user-env form)))
+
+(let [form (read1 "(apply + [1 2 3 4 5 6])")]
+  (c/emit (ana/analyze user-env form)))
+
+(let [form (read1 "(+ 1 (bit-shift-left 16 1))")]
+  (c/emit (ana/analyze user-env form)))
+
+(let [form (read1 "(let [arr (array)] (aset arr 0 100))")]
+  (c/emit (ana/analyze user-env form)))
+
+;; =============================================================================
+;; Type Inference
+
+;; The ClojureScript compiler has some simple type inference to aid with both
+;; performance and some rudimentary type checking.
+
+(let [form (read1 "(let [x true] true)")]
+  (ana/infer-tag user-env (ana/analyze user-env form)))
+
+;; Thus in some cases we can statically infer that we don't need truth tests.
+(let [form (read1 "(if (and true false) true false)")]
+  (emit-str (ana/analyze user-env form)))
+
+;; However consider that in ClojureScript 0 is not false-y so we must include an
+;; extra function call to check. In most cases this not a significant
+;; performance hit but for tight loops this may be problematic. You might also
+;; notice that there's an extraneous function call here, this is to preserve
+;; expression semantics. We rely on Google Closure to optimize this case as
+;; you'll see below.
+(let [form (read1 "(if (and 0 false) true false)")]
+  (emit-str (ana/analyze user-env form)))
+
+;; =============================================================================
+;; Google Closure
+
+;; Google Closure includes optimization facilities
