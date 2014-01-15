@@ -106,7 +106,7 @@
 (read1 "[1 2 3]")
 
 ;; cljs.analyzer/analyze takes an analyzer environment and a form, it will
-;; return ClojureScript AST node. ClojureScript AST nodes are represented as
+;; return a ClojureScript AST node. ClojureScript AST nodes are represented as
 ;; simple maps. For the following part open the console in a tab so it's easier
 ;; to view the pretty printed output.
 
@@ -118,7 +118,7 @@
 (let [form (read1 "(foo 1)")]
   (pp/pprint (ana/analyze user-env form)))
 
-;; Before moving any further let's the steps to go from a string to a
+;; Before moving any further let's review the steps to go from a string to a
 ;; ClojureScript AST node.
 
 ;; First we read a string converting text into forms.
@@ -128,17 +128,17 @@
 (first (read1 "(if x true false)"))
 
 ;; In Lisp source code, the first element of an s-expression (form) like
-;; (foo 1 2) is extremely important. The first element determines where it
+;; (foo 1 2) is extremely important. The first element determines whether it
 ;; is a special form as in the case of (if x true false), a macro as in the
 ;; case of (and true false), or a function call as in the case of
 ;; (first '(1 2 3)).
 
 ;; Special forms are actually handled by the compiler. Macros allows users
-;; to extend the language without needing to be a Lisp compiler hacros.
+;; to extend the language without needing to be a Lisp compiler hackers.
 ;; Macros will desugar into special forms.
 
-;; If the ClojureScript compiler when it encounters and s-expression with
-;; a special form call the cljs.analyer/parse multimethod
+;; The ClojureScript compiler when it encounters an s-expression that
+;; starts with a special form calls the cljs.analyer/parse multimethod
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/parse (first form) user-env form nil)))
 
@@ -167,7 +167,7 @@
 ;; =============================================================================
 ;; Compiling
 
-;; Once we have an AST, compilation is relatively straightforward.
+;; Once we have an AST node, compilation is relatively straightforward.
 
 ;; To compile an AST node to JavaScript we just call cljs.compiler/emit
 ;; with an AST node as the argument.
@@ -215,11 +215,11 @@
     (c/emit (ana/analyze user-env form))))
 
 ;; When you evalute this notice that the generated JavaScript is suboptimal.
-;; First it invokes cljs.user/foo through JavaScript's call which will be slower
-;; on engines. Also by going through call we will need to examine the arguments
-;; objects to determine which arity to invoke, another performance hit. This
-;; seems a bit silly given that we saw above that the analyzer records enough
-;; information to optimize this case.
+;; First it invokes cljs.user/foo through JavaScript's Function call method which
+;; will be slower on most engines. Also by going through call we will need to
+;; examine the arguments objects to determine which arity to invoke, another
+;; performance hit. This eems a bit silly given that we saw above that the analyzer
+;; records enough information to optimize this case.
 (let [form (read1 "(defn bar [] (foo 1))")]
   (emit-str
     (env/with-compiler-env cenv
@@ -243,6 +243,8 @@
 ;; there's as much code in the macro file as there is in the analyzer file or
 ;; the compiler file!
 
+;; Every after this point is just icing!
+
 ;; =============================================================================
 ;; Macros
 
@@ -264,12 +266,12 @@
   (emit-str (ana/analyze user-env form)))
 
 ;; However if the addition function appears in some other location than the
-;; first element of a form, we'll use ClojureScript addition function instead.
+;; first element of a form, we'll use the ClojureScript addition function instead.
 (let [form (read1 "(apply + [1 2 3 4 5 6])")]
   (emit-str (ana/analyze user-env form)))
 
 ;; Fast bit operations are also critical for ClojureScript data structure
-;; performance. Again we generat pretty much what you expect.
+;; performance. Again we generate pretty much what you expect.
 (let [form (read1 "(+ 1 (bit-shift-left 16 1))")]
   (emit-str (ana/analyze user-env form)))
 
@@ -295,7 +297,7 @@
 ;; extra function call to check. In most cases this not a significant
 ;; performance hit but for tight loops this may be problematic. You might also
 ;; notice that there's an extraneous function call here, this is to preserve
-;; expression semantics. We rely on Google Closure to optimize this case as
+;; expression semantics. We rely on Google Closure to optimize cases like this as
 ;; you'll see below.
 (let [form (read1 "(if (and 0 false) true false)")]
   (emit-str (ana/analyze user-env form)))
