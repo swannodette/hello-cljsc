@@ -247,24 +247,36 @@
 ;; Macros
 
 ;; Macros allow us to eliminate a considerable amount of complexity from the
-;; ClojureScript analyzer and compiler.
+;; ClojureScript analyzer and compiler. They also allow us to implement
+;; several simple optimizations again without complicat
 
-(read1 "(and true (diverge))")
-
+;; As it turns out and is just macro over let + if!
 (let [form (read1 "(and true (diverge))")]
-  (pp/pprint (ana/macroexpand-1 user-env form)))
+  (ana/macroexpand-1 user-env form))
 
+;; Arithmetic operations in ClojureScript are functions, not operators. However
+;; if we did not optimize simple cases, ClojureScript performance would suffer
+;; as the core data structures rely on the presence of fast arithmetic. Notice
+;; the generated JavaScript doesn't involve any function calls. This is because
+;; addition is implemented as both a ClojureScript function and an optimizing
+;; inlining macro!
 (let [form (read1 "(+ 1 2 3 4 5 6)")]
-  (c/emit (ana/analyze user-env form)))
+  (emit-str (ana/analyze user-env form)))
 
+;; However if the addition function appears in some other location than the
+;; first element of a form, we'll use ClojureScript addition function instead.
 (let [form (read1 "(apply + [1 2 3 4 5 6])")]
-  (c/emit (ana/analyze user-env form)))
+  (emit-str (ana/analyze user-env form)))
 
+;; Fast bit operations are also critical for ClojureScript data structure
+;; performance. Again we generat pretty much what you expect.
 (let [form (read1 "(+ 1 (bit-shift-left 16 1))")]
-  (c/emit (ana/analyze user-env form)))
+  (emit-str (ana/analyze user-env form)))
 
+;; Array operations are also critical for ClojureScript data structure
+;; performance and are inlined when possible.
 (let [form (read1 "(let [arr (array)] (aset arr 0 100))")]
-  (c/emit (ana/analyze user-env form)))
+  (emit-str (ana/analyze user-env form)))
 
 ;; =============================================================================
 ;; Type Inference
