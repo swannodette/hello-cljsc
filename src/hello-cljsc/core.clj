@@ -17,7 +17,7 @@
 ;; ==============================================================================
 ;; Utilities
 
-;; First we define a series of utility helper functions which will simplify
+;; First, we define a series of utility helper functions which will simplify
 ;; our interactions with the ClojureScript analyzer and compiler.
 
 ;; A simple helper to emit ClojureScript compiled to JavaScript
@@ -44,7 +44,7 @@
 ;; Reading
 
 ;; What other languages call "parsing", Clojure and ClojureScript (like Lisps
-;; before them) we call "reading". Reading a string will result in Clojure
+;; before them) call "reading". Reading a string will result in Clojure
 ;; data structures. These data structures just happen to represent source code!
 
 ;; Getting a seq of s-expressions.
@@ -67,7 +67,7 @@
 ;; The second form in (fn [x y] (+ x y)) is a vector
 (second (first (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
 
-;; The reader will annotate the data structure via metadata with source line
+;; The reader will annotate the data structure, via metadata, with source line
 ;; and column information. The presence of this information enables accurate
 ;; source mapping.
 
@@ -81,7 +81,7 @@
   second
   meta)
 
-;; on what line and column did we read (+ x y) ?
+;; On what line and column did we read (+ x y) ?
 (-> (forms-seq (string-reader "(fn [x y]\n(+ x y))"))
   first
   rest
@@ -92,8 +92,8 @@
 ;; =============================================================================
 ;; Analyzing
 
-;; Lisp forms while adequate for many kinds of user-level syntax manipulation
-;; isn't quite rich enough for actually running programs. Thus we'll want to
+;; Lisp forms, while adequate for many kinds of user-level syntax manipulation,
+;; aren't quite rich enough for actually running programs. Thus, we'll want to
 ;; generate an Abstract Syntax Tree (AST) from the forms we have read.
 
 ;; First we need to setup a basic analyzer environment.
@@ -105,7 +105,7 @@
 
 (read1 "[1 2 3]")
 
-;; cljs.analyzer/analyze takes an analyzer environment and a form, it will
+;; cljs.analyzer/analyze takes an analyzer environment and a form. It will
 ;; return a ClojureScript AST node. ClojureScript AST nodes are represented as
 ;; simple maps. For the following part open the console in a tab so it's easier
 ;; to view the pretty printed output.
@@ -122,7 +122,7 @@
 ;; Before moving any further let's review the steps to go from a string to a
 ;; ClojureScript AST node.
 
-;; First we read a string converting text into forms.
+;; First we read a string, converting text into forms.
 (read1 "(if x true false)")
 
 ;; The very first element in the form (if x true false) is a symbol
@@ -138,12 +138,12 @@
 ;; to extend the language without needing to be a Lisp compiler hacker.
 ;; Macros will desugar into special forms.
 
-;; The ClojureScript compiler when it encounters an s-expression that
-;; starts with a special form calls the cljs.analyer/parse multimethod
+;; When the ClojureScript compiler encounters an s-expression that
+;; starts with a special form, it calls the cljs.analyer/parse multimethod.
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/parse (first form) user-env form nil)))
 
-;; The following is copy and pasted from analyzer.clj
+;; The following is copied and pasted from analyzer.clj
 ;;
 ;; (defmethod parse 'if
 ;;   [op env [_ test then else :as form] name]
@@ -215,9 +215,9 @@
   (env/with-compiler-env cenv
     (c/emit (ana/analyze user-env form))))
 
-;; When you evalute this notice that the generated JavaScript is suboptimal.
-;; First it invokes cljs.user/foo through JavaScript's Function call method which
-;; will be slower on most engines. Also by going through call we will need to
+;; When you evalute this, notice that the generated JavaScript is suboptimal.
+;; First, it invokes cljs.user/foo through JavaScript's Function call method, which
+;; will be slower on most engines. Also, by going through call, we will need to
 ;; examine the arguments objects to determine which arity to invoke, another
 ;; performance hit. This seems a bit silly given that we saw above that the analyzer
 ;; records enough information to optimize this case.
@@ -226,7 +226,7 @@
     (env/with-compiler-env cenv
       (ana/analyze user-env form))))
 
-;; And in fact ClojureScript does optimize this case under the :advanced
+;; And, in fact, ClojureScript does optimize this case under the :advanced
 ;; compilation mode. You can get the same behavior by dynamically binding
 ;; cljs.analyzer/*cljs-static-fns* to true.
 (let [form (read1 "(defn bar [] (foo 1))")]
@@ -244,20 +244,20 @@
 ;; there's as much code in the macro file as there is in the analyzer file or
 ;; the compiler file!
 
-;; Everything after this point is just icing!
+;; Everything after this point is just icing on the cake!
 
 ;; =============================================================================
 ;; Macros
 
 ;; Macros allow us to eliminate a considerable amount of complexity from the
 ;; ClojureScript analyzer and compiler. They also allow us to implement
-;; several simple optimizations again without complicat
+;; several simple optimizations again without complicat [complicating something???]
 
-;; As it turns out and is just macro over let + if!
+;; As it turns out, and is just a macro over let + if!
 (let [form (read1 "(and true (diverge))")]
   (ana/macroexpand-1 user-env form))
 
-;; Arithmetic operations in ClojureScript are functions, not operators. However
+;; Arithmetic operations in ClojureScript are functions, not operators. However,
 ;; if we did not optimize simple cases, ClojureScript performance would suffer
 ;; as the core data structures rely on the presence of fast arithmetic. Notice
 ;; the generated JavaScript doesn't involve any function calls. This is because
@@ -266,13 +266,13 @@
 (let [form (read1 "(+ 1 2 3 4 5 6)")]
   (emit-str (ana/analyze user-env form)))
 
-;; However if the addition function appears in some other location than the
+;; However, if the addition function appears in some other location than the
 ;; first element of a form, we'll use the ClojureScript addition function instead.
 (let [form (read1 "(apply + [1 2 3 4 5 6])")]
   (emit-str (ana/analyze user-env form)))
 
 ;; Fast bit operations are also critical for ClojureScript data structure
-;; performance. Again we generate pretty much what you expect.
+;; performance. Again, we generate pretty much what you expect.
 (let [form (read1 "(+ 1 (bit-shift-left 16 1))")]
   (emit-str (ana/analyze user-env form)))
 
@@ -285,20 +285,20 @@
 ;; Type Inference
 
 ;; The ClojureScript compiler has some simple type inference to aid with both
-;; performance and some rudimentary type checking.
+;; performance and rudimentary type checking.
 
 (let [form (read1 "(let [x true] true)")]
   (ana/infer-tag user-env (ana/analyze user-env form)))
 
-;; Thus in some cases we can statically infer that we don't need truth tests.
+;; Thus, in some cases we can statically infer that we don't need truth tests.
 (let [form (read1 "(if (and true false) true false)")]
   (emit-str (ana/analyze user-env form)))
 
-;; However consider that in ClojureScript 0 is not false-y so we must include an
+;; However, consider that in ClojureScript 0 is not false-y so we must include an
 ;; extra function call to check. In most cases this not a significant
 ;; performance hit but for tight loops this may be problematic. You might also
-;; notice that there's an extraneous function call here, this is to preserve
-;; expression semantics. We rely on Google Closure to optimize cases like this as
+;; notice that there's an extraneous function call here. This is to preserve
+;; expression semantics. We rely on Google Closure to optimize cases like this, as
 ;; you'll see below.
 (let [form (read1 "(if (and 0 false) true false)")]
   (emit-str (ana/analyze user-env form)))
