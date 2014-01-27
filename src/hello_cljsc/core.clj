@@ -215,7 +215,7 @@
   (env/with-compiler-env cenv
     (c/emit (ana/analyze user-env form))))
 
-;; When you evalute this, notice that the generated JavaScript is suboptimal.
+;; When you evaluate this, notice that the generated JavaScript is suboptimal.
 ;; First, it invokes cljs.user/foo through JavaScript's Function call method, which
 ;; will be slower on most engines. Also, by going through call, we will need to
 ;; examine the arguments objects to determine which arity to invoke, another
@@ -251,7 +251,7 @@
 
 ;; Macros allow us to eliminate a considerable amount of complexity from the
 ;; ClojureScript analyzer and compiler. They also allow us to implement
-;; several simple optimizations again without complicat [complicating something???]
+;; simple optimizations without relying on special support from the compiler.
 
 ;; As it turns out, and is just a macro over let + if!
 (let [form (read1 "(and true (diverge))")]
