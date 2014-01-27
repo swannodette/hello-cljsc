@@ -198,7 +198,7 @@
     (ana/analyze user-env form)))
 
 ;; Now if we look at the contents of cenv we'll see that we have a single def for x.
-@cenv
+(::ana/namespaces (deref cenv))
 
 ;; Let's analyze a top level function.
 (let [form (read1 "(defn foo [a b] (+ a b))")]
@@ -251,7 +251,7 @@
 
 ;; Macros allow us to eliminate a considerable amount of complexity from the
 ;; ClojureScript analyzer and compiler. They also allow us to implement
-;; several simple optimizations again without complicat [complicating something???]
+;; simple optimizations without relying on special support from the compiler.
 
 ;; As it turns out, and is just a macro over let + if!
 (let [form (read1 "(and true (diverge))")]
