@@ -251,7 +251,7 @@
 
 ;; Macros allow us to eliminate a considerable amount of complexity from the
 ;; ClojureScript analyzer and compiler. They also allow us to implement
-;; several simple optimizations again without complicat [complicating something???]
+;; simple optimizations without relying on special support from the compiler.
 
 ;; As it turns out, and is just a macro over let + if!
 (let [form (read1 "(and true (diverge))")]
