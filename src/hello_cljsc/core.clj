@@ -14,6 +14,19 @@
     [cljs.env :as env])
   (:import [java.io StringReader]))
 
+
+;; ==============================================================================
+;; Reading
+
+;; What other languages call "parsing", Clojure and ClojureScript (like Lisps
+;; before them) call "reading".
+(reader/read-string "(+ 1 2)")
+(reader/read-string "(+ 1 [2 3] {1 2} #{1 2} #_[1 23 3])")
+
+;; Reading a string will result in Clojure data structures that we can be manipulated
+;; regular Clojure code!
+(map type (reader/read-string "(+ 1 [2 3] {1 2} #{1 2})"))
+
 ;; ==============================================================================
 ;; Utilities
 
@@ -39,13 +52,6 @@
                         (if-let [form (reader/read rdr nil nil)]
                           (cons form (forms-seq*)))))]
     (forms-seq*)))
-
-;; ==============================================================================
-;; Reading
-
-;; What other languages call "parsing", Clojure and ClojureScript (like Lisps
-;; before them) call "reading". Reading a string will result in Clojure
-;; data structures. These data structures just happen to represent source code!
 
 ;; Getting a seq of s-expressions.
 (forms-seq (string-reader "(+ 1 2)"))
