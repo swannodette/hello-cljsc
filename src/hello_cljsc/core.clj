@@ -344,3 +344,8 @@
 (let [form (read1 "(let [x (cond true (+ 1 2) :else (+ 3 4))] x)")]
   (cc/optimize {:optimizations :simple}
     (emit-str (ana/analyze user-env form))))
+
+;; The same expression with advanced optimizations is even terser!
+(let [form (read1 "(let [x (cond true (+ 1 2) :else (+ 3 4))] x)")]
+  (cc/optimize {:optimizations :advanced}
+    (emit-str (ana/analyze user-env form))))
