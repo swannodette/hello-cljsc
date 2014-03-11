@@ -67,11 +67,15 @@
 ;; The first form is a list.
 (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))
 
-;; The first form in (fn [x y] (+ x y)) is a symbol
+;; The first form in (fn [x y] (+ x y)) is the clojure symbol for a function: fn
 (ffirst (forms-seq (string-reader "(fn [x y]\n(+ x y))")))
+(type (ffirst (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
+
 
 ;; The second form in (fn [x y] (+ x y)) is a vector
 (second (first (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
+(type (second (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))))
+
 
 ;; The reader will annotate the data structure, via metadata, with source line
 ;; and column information. The presence of this information enables accurate
