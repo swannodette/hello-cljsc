@@ -4,6 +4,7 @@
 ;; Command-ENTER. Start with evaluating this namespace expression.
 
 (ns hello-cljsc.core
+  (:use [clojure.data :only [diff]])
   (:require
     [clojure.pprint :as pp]
     [clojure.repl :as repl]
@@ -171,6 +172,8 @@
 
 ;; When the ClojureScript compiler encounters an s-expression that
 ;; starts with a special form, it calls the cljs.analyer/parse multimethod.
+
+
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/parse (first form) user-env form nil)))
 
@@ -195,6 +198,13 @@
 ;; cljs.analyzer/analyze delegates to cljs.analyzer/parse
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/analyze user-env form)))
+
+;; The output of parse and analyze are almost the same: only the :tag and the :env differ
+(let [form (read1 "(if x true false)")
+      anlz-res  (ana/analyze user-env form)
+      parse-res  (ana/parse (first form) user-env form nil)]
+  (first (diff anlz-res parse-res)))
+
 
 ;; =============================================================================
 ;; Compiling
