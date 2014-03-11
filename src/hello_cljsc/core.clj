@@ -153,14 +153,16 @@
 ;; The very first element in the form (if x true false) is a symbol
 (first (read1 "(if x true false)"))
 
-;; In Lisp source code, the first element of an s-expression (form) like
-;; (foo 1 2) is extremely important. The first element determines whether it
-;; is a special form as in the case of (if x true false), a macro as in the
-;; case of (and true false), or a function call as in the case of
-;; (first '(1 2 3)).
 
-;; Special forms are actually handled by the compiler. Macros allows users
-;; to extend the language without needing to be a Lisp compiler hacker.
+;; In Lisp source code, the first element of an s-expression (form) like
+;; (foo 1 2) is extremely important. The first element determines whether the
+;; form is:
+;; 1. a special form as in the case of (if x true false)
+;; 2. a macro as in the case of (and true false)
+;; 3. a function call as in the case of (first '(1 2 3)).
+
+;; Special forms are actually handled by the compiler.
+;; Macros allows users to extend the language without needing to be a Lisp compiler hacker.
 ;; Macros will desugar into special forms.
 
 ;; When the ClojureScript compiler encounters an s-expression that
