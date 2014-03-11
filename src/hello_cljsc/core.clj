@@ -107,6 +107,20 @@
   meta)
 
 ;; =============================================================================
+;; Helper
+
+;; A helper to just read the first s-expression. In the following examples we will
+;; limit ourself to the first s-expression.
+(defn read1 [str]
+  (first (forms-seq (string-reader str))))
+
+(read1 "[1 2 3]")
+
+;; If there are more than one s-expressions, read1 will skip them.
+(read1 "(+ 2 [1 2 3]) (+ 2 3)")
+
+
+;; =============================================================================
 ;; Analyzing
 
 ;; Lisp forms, while adequate for many kinds of user-level syntax manipulation,
@@ -115,12 +129,6 @@
 
 ;; First we need to setup a basic analyzer environment.
 (def user-env '{:ns {:name cljs.user} :locals {}})
-
-;; A helper to just read the first s-expression
-(defn read1 [str]
-  (first (forms-seq (string-reader str))))
-
-(read1 "[1 2 3]")
 
 ;; cljs.analyzer/analyze takes an analyzer environment and a form. It will
 ;; return a ClojureScript AST node. ClojureScript AST nodes are represented as
