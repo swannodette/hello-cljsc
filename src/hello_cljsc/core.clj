@@ -6,6 +6,7 @@
 (ns hello-cljsc.core
   (:require
     [clojure.pprint :as pp]
+    [clojure.repl :as repl]
     [clojure.tools.reader :as reader]
     [clojure.tools.reader.reader-types :as readers]
     [cljs.analyzer :as ana]
@@ -134,6 +135,9 @@
 ;; return a ClojureScript AST node. ClojureScript AST nodes are represented as
 ;; simple maps. For the following part open the console in a tab so it's easier
 ;; to view the pretty printed output.
+
+;; This will display in the console the documentation for analyze
+(repl/doc ana/analyze)
 
 ;; This will pretty print a :vector AST node. Click the highlighted number in
 ;; the lower right corner to bring up the console to see the output.
