@@ -4,8 +4,10 @@
 ;; Command-ENTER. Start with evaluating this namespace expression.
 
 (ns hello-cljsc.core
+  (:use [clojure.data :only [diff]])
   (:require
     [clojure.pprint :as pp]
+    [clojure.repl :as repl]
     [clojure.tools.reader :as reader]
     [clojure.tools.reader.reader-types :as readers]
     [cljs.analyzer :as ana]
@@ -13,6 +15,19 @@
     [cljs.closure :as cc]
     [cljs.env :as env])
   (:import [java.io StringReader]))
+
+
+;; ==============================================================================
+;; Reading
+
+;; What other languages call "parsing", Clojure and ClojureScript (like Lisps
+;; before them) call "reading".
+(reader/read-string "(+ 1 2)")
+(reader/read-string "(+ 1 [2 3] {1 2} #{1 2} #_[1 23 3])")
+
+;; Reading a string will result in Clojure data structures that we can be manipulated
+;; regular Clojure code!
+(map type (reader/read-string "(+ 1 [2 3] {1 2} #{1 2})"))
 
 ;; ==============================================================================
 ;; Utilities
@@ -61,11 +76,15 @@
 ;; The first form is a list.
 (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))
 
-;; The first form in (fn [x y] (+ x y)) is a symbol
+;; The first form in (fn [x y] (+ x y)) is the clojure symbol for a function: fn
 (ffirst (forms-seq (string-reader "(fn [x y]\n(+ x y))")))
+(type (ffirst (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
+
 
 ;; The second form in (fn [x y] (+ x y)) is a vector
 (second (first (forms-seq (string-reader "(fn [x y]\n(+ x y))"))))
+(type (second (first (forms-seq (string-reader "(fn [x y]\n(+ x y))")))))
+
 
 ;; The reader will annotate the data structure, via metadata, with source line
 ;; and column information. The presence of this information enables accurate
@@ -90,6 +109,20 @@
   meta)
 
 ;; =============================================================================
+;; Helper
+
+;; A helper to just read the first s-expression. In the following examples we will
+;; limit ourself to the first s-expression.
+(defn read1 [str]
+  (first (forms-seq (string-reader str))))
+
+(read1 "[1 2 3]")
+
+;; If there are more than one s-expressions, read1 will skip them.
+(read1 "(+ 2 [1 2 3]) (+ 2 3)")
+
+
+;; =============================================================================
 ;; Analyzing
 
 ;; Lisp forms, while adequate for many kinds of user-level syntax manipulation,
@@ -99,16 +132,13 @@
 ;; First we need to setup a basic analyzer environment.
 (def user-env '{:ns {:name cljs.user} :locals {}})
 
-;; A helper to just read the first s-expression
-(defn read1 [str]
-  (first (forms-seq (string-reader str))))
-
-(read1 "[1 2 3]")
-
 ;; cljs.analyzer/analyze takes an analyzer environment and a form. It will
 ;; return a ClojureScript AST node. ClojureScript AST nodes are represented as
 ;; simple maps. For the following part open the console in a tab so it's easier
 ;; to view the pretty printed output.
+
+;; This will display in the console the documentation for analyze
+(repl/doc ana/analyze)
 
 ;; This will pretty print a :vector AST node. Click the highlighted number in
 ;; the lower right corner to bring up the console to see the output.
@@ -128,18 +158,22 @@
 ;; The very first element in the form (if x true false) is a symbol
 (first (read1 "(if x true false)"))
 
-;; In Lisp source code, the first element of an s-expression (form) like
-;; (foo 1 2) is extremely important. The first element determines whether it
-;; is a special form as in the case of (if x true false), a macro as in the
-;; case of (and true false), or a function call as in the case of
-;; (first '(1 2 3)).
 
-;; Special forms are actually handled by the compiler. Macros allows users
-;; to extend the language without needing to be a Lisp compiler hacker.
+;; In Lisp source code, the first element of an s-expression (form) like
+;; (foo 1 2) is extremely important. The first element determines whether the
+;; form is:
+;; 1. a special form as in the case of (if x true false)
+;; 2. a macro as in the case of (and true false)
+;; 3. a function call as in the case of (first '(1 2 3)).
+
+;; Special forms are actually handled by the compiler.
+;; Macros allows users to extend the language without needing to be a Lisp compiler hacker.
 ;; Macros will desugar into special forms.
 
 ;; When the ClojureScript compiler encounters an s-expression that
 ;; starts with a special form, it calls the cljs.analyer/parse multimethod.
+
+
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/parse (first form) user-env form nil)))
 
@@ -164,6 +198,13 @@
 ;; cljs.analyzer/analyze delegates to cljs.analyzer/parse
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/analyze user-env form)))
+
+;; The output of parse and analyze are almost the same: only the :tag and the :env differ
+(let [form (read1 "(if x true false)")
+      anlz-res  (ana/analyze user-env form)
+      parse-res  (ana/parse (first form) user-env form nil)]
+  (first (diff anlz-res parse-res)))
+
 
 ;; =============================================================================
 ;; Compiling
@@ -316,4 +357,9 @@
 ;; The same expression with simple optimizations is surprisingly terse.
 (let [form (read1 "(let [x (cond true (+ 1 2) :else (+ 3 4))] x)")]
   (cc/optimize {:optimizations :simple}
+    (emit-str (ana/analyze user-env form))))
+
+;; The same expression with advanced optimizations is even terser!
+(let [form (read1 "(let [x (cond true (+ 1 2) :else (+ 3 4))] x)")]
+  (cc/optimize {:optimizations :advanced}
     (emit-str (ana/analyze user-env form))))
