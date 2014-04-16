@@ -212,8 +212,9 @@
 
 ;; Let's redefine foo, this time with two arities.
 (let [form (read1 "(defn foo ([a] a) ([a b] (+ a b)))")]
-  (env/with-compiler-env cenv
-    (c/emit (ana/analyze user-env form))))
+  (emit-str
+    (env/with-compiler-env cenv
+      (ana/analyze user-env form)))))
 
 ;; When you evaluate this, notice that the generated JavaScript is suboptimal.
 ;; First, it invokes cljs.user/foo through JavaScript's Function call method, which
