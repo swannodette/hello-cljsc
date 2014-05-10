@@ -109,7 +109,7 @@
 (defn read1 [str]
   (first (forms-seq (string-reader str))))
 
-(read1 "[1 2 3]")
+(read1 "[1 2 3] [4 5 6]")
 
 ;; cljs.analyzer/analyze takes an analyzer environment and a form. It will
 ;; return a ClojureScript AST node. ClojureScript AST nodes are represented as
