@@ -23,8 +23,8 @@
 (reader/read-string "(+ 1 2)")
 (reader/read-string "(+ 1 [2 3] {1 2} #{1 2} #_[1 23 3])")
 
-;; Reading a string will result in Clojure data structures that we can be manipulated
-;; regular Clojure code!
+;; Reading a string will result in Clojure data structures that can be manipulated
+;; with regular Clojure code!
 (map type (reader/read-string "(+ 1 [2 3] {1 2} #{1 2})"))
 
 ;; ==============================================================================
@@ -301,7 +301,7 @@
   (emit-str (ana/analyze user-env form)))
 
 ;; However, consider that in ClojureScript 0 is not false-y so we must include an
-;; extra function call to check. In most cases this not a significant
+;; extra function call to check. In most cases this is not a significant
 ;; performance hit but for tight loops this may be problematic. You might also
 ;; notice that there's an extraneous function call here. This is to preserve
 ;; expression semantics. We rely on Google Closure to optimize cases like this, as
