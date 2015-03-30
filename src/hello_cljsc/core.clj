@@ -145,7 +145,7 @@
 ;; Macros will desugar into special forms.
 
 ;; When the ClojureScript compiler encounters an s-expression that
-;; starts with a special form, it calls the cljs.analyer/parse multimethod.
+;; starts with a special form, it calls the cljs.analyzer/parse multimethod.
 (let [form (read1 "(if x true false)")]
   (pp/pprint (ana/parse (first form) user-env form nil nil)))
 
