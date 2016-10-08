@@ -204,7 +204,7 @@
     (ana/analyze user-env form)))
 
 ;; Now if we look at the contents of cenv we'll see that we have a single def for x.
-@cenv
+(::ana/namespaces (deref cenv))
 
 ;; Let's analyze a top level function.
 (let [form (read1 "(defn foo [a b] (+ a b))")]
